@@ -43,14 +43,16 @@ architecture Behavioral of tb_gfsm is
            key_minus_imp : in STD_LOGIC;
            key_mode_imp : in STD_LOGIC;
            key_action_imp : in STD_LOGIC;
+           led_alarm_ring : in STD_LOGIC;
+           out_mode : in STD_LOGIC;
            --en_1 : in STD_LOGIC;
            clk : in STD_LOGIC;--check if 'clock' is needed or not
            reset : in STD_LOGIC;
-           selected_state : out STD_LOGIC_VECTOR (2 downto 0);
-           active_alarm : out STD_LOGIC;
-           active_countdown : out STD_LOGIC;
-           active_stopwatch : out STD_LOGIC;
-           active_alarm_settings : out STD_LOGIC);
+           selected_state : out STD_LOGIC_VECTOR (2 downto 0));
+           --active_alarm : out STD_LOGIC;
+           --active_countdown : out STD_LOGIC;
+           --active_stopwatch : out STD_LOGIC;
+           --active_alarm_settings : out STD_LOGIC);
 
 
 
@@ -61,15 +63,17 @@ architecture Behavioral of tb_gfsm is
     signal key_minus_imp:STD_LOGIC := '0';
     signal key_mode_imp:STD_LOGIC := '0';
     signal key_action_imp:STD_LOGIC := '0';
-    signal en_1:STD_LOGIC := '0';
+    signal led_alarm_ring:STD_LOGIC := '0';
+    signal out_mode:STD_LOGIC := '0';
+    --signal en_1:STD_LOGIC := '0';
     signal clk:STD_LOGIC := '0';
     signal reset:STD_LOGIC := '0';
     --Outputs of the testbench
     signal selected_state:STD_LOGIC_VECTOR(2 downto 0);
-    signal active_alarm:STD_LOGIC;
-    signal active_countdown:STD_LOGIC;
-    signal active_stopwatch:STD_LOGIC;
-    signal active_alarm_settings:STD_LOGIC;
+    --signal active_alarm:STD_LOGIC;
+    --signal active_countdown:STD_LOGIC;
+    --signal active_stopwatch:STD_LOGIC;
+    --signal active_alarm_settings:STD_LOGIC;
     --Clock period definition
     --constant clk_period : time := 10 ns;
     --constant en_1_period : time := 100ns;--really this period will be 10^9 ns, check with Florian if this is ok for behav simulation
@@ -84,14 +88,16 @@ begin
         key_minus_imp => key_minus_imp,
         key_mode_imp => key_mode_imp,
         key_action_imp => key_action_imp,
+        led_alarm_ring => led_alarm_ring,
+        out_mode => out_mode,
         --en_1 => en_1,
         clk => clk,
         reset =>  reset,
-        selected_state =>selected_state,
-        active_alarm =>  active_alarm,
-        active_countdown => active_countdown,
-        active_stopwatch => active_stopwatch,
-        active_alarm_settings => active_alarm_settings
+        selected_state =>selected_state
+        --active_alarm =>  active_alarm,
+        --active_countdown => active_countdown,
+        --active_stopwatch => active_stopwatch,
+        --active_alarm_settings => active_alarm_settings
 
     
     );
@@ -105,13 +111,13 @@ begin
    end process;
         
    --en_1 process definitions
-    en_1_process :process
-   begin
-		en_1 <= '0';
-		wait for en_1_period/2;
-		en_1 <= '1';
-		wait for en_1_period/2;
-   end process;
+--    en_1_process :process
+--   begin
+--		en_1 <= '0';
+--		wait for en_1_period/2;
+--		en_1 <= '1';
+--		wait for en_1_period/2;
+--   end process;
    
    
    -- Stimulus process
@@ -222,6 +228,55 @@ begin
         
         key_mode_imp <= '0';
        
+        wait for 500ms;
+        
+        key_mode_imp <= '1';--expected to goto date mode while in time mode , currently according to code, state 001
+        
+        wait for clk_period;
+        
+        key_mode_imp <= '0';
+        
+        wait for clk_period;
+        
+        key_mode_imp <= '1';--expected to goto alarm mode while in date mode , currently according to code, state 010
+        
+        wait for clk_period;
+        
+        key_mode_imp <= '0';
+                
+        wait for clk_period;
+        
+        key_mode_imp <= '1';--expected to goto timeswitch_on while in alarm mode , currently according to code, state 100
+        
+        wait for clk_period;
+        
+        key_mode_imp <= '0';
+        
+        wait for clk_period;
+        
+        key_mode_imp <= '1';--expected to goto timeswitch_off while in timeswitch_on mode , currently according to code, state 101
+        
+        wait for clk_period;
+        
+        key_mode_imp <= '0';
+        
+        wait for clk_period;
+        
+        led_alarm_ring <= '1';--expected to goto alarm mode while in timeswitch_off mode , currently according to code, state 010
+        
+        wait for clk_period;
+        
+        led_alarm_ring <= '0';
+        
+        wait for 100ms;
+        
+        out_mode <= '1';--expected to goto last remembered  mode while in alarm mode , currently according to code, state 101
+        
+        wait for clk_period;
+        
+        out_mode <= '0';
+        
+        wait for clk_period;
         
 
         
